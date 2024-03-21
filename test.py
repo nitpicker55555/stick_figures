@@ -1,58 +1,87 @@
-import pandas as pd
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 import numpy as np
 
-# 加载数据
-df = pd.read_csv('chicago_acs_data.csv')
+# 定义线段的起点和终点
+a_start = [0, 0]
+a_end = [1, 1]
+b_start = a_end
+b_end = [2, 1]
+c_start = b_end
+c_end = [3, 0]
 
-# 确保数据是数值类型
-for column in df.columns:
-    df[column] = pd.to_numeric(df[column], errors='coerce')
+# 计算b线段的中点，作为旋转中心
+# b_mid = [(b_start[0] + b_end[0]) / 2, (b_start[1] + b_end[1]) / 2]
 
-# 标准化数据，使之适用于定义角度和长度
-# 这里我们仅将数据转换为它们在各自列中的 z-scores
-for col in ['B15003_022E', 'B12001_001E', 'B01001_002E', 'B01001_026E','B19013_001E','B01001_001E']:
-    df[col] = (df[col] - df[col].mean()) / df[col].std()
+# 绘制初始图形
+fig = go.Figure()
 
-# 定义绘制 Stick Figure 的函数
-def draw_stick_figure(ax, origin, angles, lengths=(0.1,0.1, 0.1, 0.1), head_radius=0.001):
-    # 定义肢体的结束点
-    points = np.array([origin])
+# 添加线段
+fig.add_trace(go.Scatter(x=[a_start[0], a_end[0]], y=[a_start[1], a_end[1]], mode='lines', name='a'))
+fig.add_trace(go.Scatter(x=[b_start[0], b_end[0]], y=[b_start[1], b_end[1]], mode='lines', name='b'))
+fig.add_trace(go.Scatter(x=[c_start[0], c_end[0]], y=[c_start[1], c_end[1]], mode='lines', name='c'))
 
-    for angle, length in zip(angles, lengths):
-        # 计算新点的坐标
-        dx = length * np.cos(angle)
-        dy = length * np.sin(angle)
-        new_point = points[-1] + np.array([dx, dy])
-        points = np.vstack([points, new_point])
+# 添加滑块
+fig.update_layout(
+    sliders=[dict(
+        steps=[dict(method='animate',
+                    args=[[f'frame{k}'],
+                          dict(mode='immediate',
+                               frame=dict(duration=500, redraw=True),
+                               transition=dict(duration=0))],
+                    label=f'{k}') for k in range(0, 360, 10)],
+        active=0,
+        currentvalue={"prefix": "Rotation angle: "},
+        pad={"t": 50})],
+    updatemenus=[dict(
+        type="buttons",
+        direction="left",
+        buttons=[dict(label="Play",
+                      method="animate",
+                      args=[None, dict(frame=dict(duration=500, redraw=True), fromcurrent=True)])])])
 
-    # 绘制身体
-    body_parts = [(0, 1), (1, 2), (1, 3), (1, 4)]
-    for start, end in body_parts:
-        ax.plot([points[start][0], points[end][0]], [points[start][1], points[end][1]], 'k-')
+frames = []
+def calculate_rotated_data(angle):
+    """
+    根据给定的角度和线段起始点，计算旋转后的线段数据。
 
-    # 绘制头部
-    head = plt.Circle(points[1], head_radius, color='k', fill=False)
-    ax.add_artist(head)
+    Parameters:
+    - angle: 旋转的角度（度）
+    - a_start, a_end: 线段a的起点和终点坐标
+    - b_start, b_end: 线段b的起点和终点坐标
+    - c_start, c_end: 线段c的起点和终点坐标
 
-# 设置坐标轴的范围
-plt.figure(figsize=(8, 8))
-ax = plt.subplot(111, aspect='equal')
-plt.xlim(df['B01001_001E'].min(), df['B01001_001E'].max())
-plt.ylim(df['B19013_001E'].min(), df['B19013_001E'].max())
+    Returns:
+    - data: 包含旋转后的三个线段数据的列表
+    """
+    # 计算b线段的中点，作为旋转中心
+    b_mid = [(b_start[0]+b_end[0])/2, (b_start[1]+b_end[1])/2]
 
-# 对于每一行数据，绘制一个 Stick Figure
-for index, row in df.iterrows():
-    # 定义 Stick Figure 的起点（根据 B01001_001E 和 B19013_001E）
-    origin = (row['B01001_001E'], row['B19013_001E'])
+    # 将角度转换为弧度
+    rad = np.radians(angle)
+    cos_a, sin_a = np.cos(rad), np.sin(rad)
 
-    # 获取其他变量以定义角度（这里使用的是弧度）
-    angles = [np.deg2rad(360 * z) for z in row[['B15003_022E', 'B12001_001E', 'B01001_002E', 'B01001_026E']]]
+    # 定义旋转函数
+    def rotate_point(p):
+        return [cos_a * (p[0]-b_mid[0]) - sin_a * (p[1]-b_mid[1]) + b_mid[0],
+                sin_a * (p[0]-b_mid[0]) + cos_a * (p[1]-b_mid[1]) + b_mid[1]]
 
-    # 绘制 Stick Figure（这里假设所有长度相同，你可以根据需要进行调整）
-    draw_stick_figure(ax, origin, angles)
+    # 计算旋转后的线段坐标
+    ra_start, ra_end = rotate_point(a_start), rotate_point(a_end)
+    rb_start, rb_end = rotate_point(b_start), rotate_point(b_end)
+    rc_start, rc_end = rotate_point(c_start), rotate_point(c_end)
 
-plt.xlabel('B01001_001E')
-plt.ylabel('B19013_001E')
-plt.title('Stick Figures Representation of Data')
-plt.show()
+    # 准备数据用于更新图形
+    data = [
+        {'x': [ra_start[0], ra_end[0]], 'y': [ra_start[1], ra_end[1]], 'mode': 'lines', 'name': 'a'},
+        {'x': [rb_start[0], rb_end[0]], 'y': [rb_start[1], rb_end[1]], 'mode': 'lines', 'name': 'b'},
+        {'x': [rc_start[0], rc_end[0]], 'y': [rc_start[1], rc_end[1]], 'mode': 'lines', 'name': 'c'}
+    ]
+
+    return data
+for angle in range(0, 360, 10):
+    frames.append(go.Frame(data=calculate_rotated_data(angle),
+                           name=f'frame{angle}'))
+
+fig.frames = frames
+
+fig.show()
