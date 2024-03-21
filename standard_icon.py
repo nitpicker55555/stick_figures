@@ -38,19 +38,19 @@ def draw_pattern(angle_ac, angle_bc, angle_dc, angle_ec, angle_c_vertical, unit_
 import plotly.graph_objects as go
 
 
-def draw_pattern_plotly(angle_sets, c_start, angle_rotation,unit_length=1):
+def draw_pattern_plotly(angle_sets, c_start, angle_rotation,unit_length=0.01):
     data = []
     c_data=[]
 
-    for set_idx, (angles, c_start) in enumerate(zip(angle_sets, c_start)):
+    for set_idx, (angles, c_mid) in enumerate(zip(angle_sets, c_start)):
 
 
         angle_c_vertical=90
         # 计算线段c的方向
         c_dx = np.cos(np.radians(angle_c_vertical))
         c_dy = np.sin(np.radians(angle_c_vertical))
-        c_mid = np.array([2 + 4 * set_idx, 2])  # 设置中点，确保两个图案不重叠
-        # c_start = c_mid - np.array([c_dx * unit_length / 2, c_dy * unit_length / 2])
+        # c_mid = np.array([2 + 4 * set_idx, 2])  # 设置中点，确保两个图案不重叠
+        c_start = c_mid - np.array([c_dx * unit_length / 2, c_dy * unit_length / 2])
         c_end = c_mid + np.array([c_dx * unit_length / 2, c_dy * unit_length / 2])
 
         # 旋转矩阵
@@ -89,57 +89,60 @@ def draw_pattern_plotly(angle_sets, c_start, angle_rotation,unit_length=1):
 
 # 设置两组角度参数以及c线段的角度
 angle_sets = [
-    [45, 45, 135, 135],  # 第一组图案的角度参数
-    [135, 135, 135, 135]   # 第二组图案的角度参数
+[38.0, 117.0, 70.0, 153.0]
+    # [45, 45, 135, 135],  # 第一组图案的角度参数
+    # [135, 135, 135, 135]   # 第二组图案的角度参数
 ]
-c_start = [(1,2), (2,4)]  # c线段相对于垂直线的角度
+c_start = [[0.38968731792581085, 0.3179088738450779], [0.5365119440668091, 0.21254391572551784], [0.4899980578753156, 0.1902295365012758]]  # c线段相对于垂直线的角度
+def data_input(angle_sets,c_start):
 # 绘制图案
-for angle in angle_sets:
-    angle[2] = 180 - angle[2]
-    angle[3] = 180 - abs(angle[3])
+    for angle in angle_sets:
 
-    angle[1] = -abs(angle[1])
-    # angles[2] = abs(angles[2])
-    # angles[0] = abs(angles[0])
-    angle[3] = -abs(angle[3])
-data=draw_pattern_plotly(angle_sets,c_start,45)
-fig = go.Figure()
-# fig.add_trace(
-#     go.Scatter(c_data))
+        angle[2] = 180 - angle[2]
+        angle[3] = 180 - (angle[3])
 
-for i in data:
-    fig.add_trace(
-        go.Scatter(i))
+        angle[1] = -(angle[1])
+        # angles[2] = abs(angles[2])
+        # angles[0] = abs(angles[0])
+        angle[3] = -(angle[3])
+    data=draw_pattern_plotly(angle_sets,c_start,0)
+    fig = go.Figure()
+    # fig.add_trace(
+    #     go.Scatter(c_data))
 
-fig.update_layout(title="Different Patterns with Varied Angles", xaxis_showgrid=False, yaxis_showgrid=False,
-                  plot_bgcolor='white')
+    for i in data:
+        fig.add_trace(
+            go.Scatter(i))
 
-fig.update_layout(
-    sliders=[dict(
-        steps=[dict(method='animate',
-                    args=[[f'frame{k}'],
-                          dict(mode='immediate',
-                               frame=dict(duration=500, redraw=True),
-                               transition=dict(duration=0))],
-                    label=f'{k}') for k in range(0, 360, 10)],
-        active=0,
-        currentvalue={"prefix": "Rotation angle: "},
-        pad={"t": 50})],
-    updatemenus=[dict(
-        type="buttons",
-        direction="left",
-        buttons=[dict(label="Play",
-                      method="animate",
-                      args=[None, dict(frame=dict(duration=500, redraw=True), fromcurrent=True)])])])
+    fig.update_layout(title="Chicago acs data 2017", xaxis_showgrid=False, yaxis_showgrid=False,
+                      plot_bgcolor='white')
 
-frames = []
-for angle in range(0, 360, 20):
-    frames.append(go.Frame(data=draw_pattern_plotly(angle_sets,c_start,angle),
-                           name=f'frame{angle}'))
+    fig.update_layout(
+        sliders=[dict(
+            steps=[dict(method='animate',
+                        args=[[f'frame{k}'],
+                              dict(mode='immediate',
+                                   frame=dict(duration=500, redraw=True),
+                                   transition=dict(duration=0))],
+                        label=f'{k}') for k in range(0, 360, 10)],
+            active=0,
+            currentvalue={"prefix": "Rotation angle: "},
+            pad={"t": 50})],
+        updatemenus=[dict(
+            type="buttons",
+            direction="left",
+            buttons=[dict(label="Play",
+                          method="animate",
+                          args=[None, dict(frame=dict(duration=500, redraw=True), fromcurrent=True)])])])
 
-fig.frames = frames
+    frames = []
+    for angle in range(0, 360, 20):
+        frames.append(go.Frame(data=draw_pattern_plotly(angle_sets,c_start,angle),
+                               name=f'frame{angle}'))
 
-fig.show()
+    fig.frames = frames
 
+    fig.show()
+# data_input(angle_sets,c_start)
 # 示例：绘制图案
 # draw_pattern(135, 135, 135, 135, 90)
