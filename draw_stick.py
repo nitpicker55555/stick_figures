@@ -3,12 +3,18 @@ import plotly.graph_objects as go
 import numpy as np
 
 # 加载数据
-df = pd.read_csv('chicago_acs_data.csv')
+df = pd.read_csv('ss.csv')
 
 # 转换数据类型确保数据是数值类型
 for column in df.columns:
     df[column] = pd.to_numeric(df[column], errors='coerce')
-for col in ['B15003_022E', 'B12001_001E', 'B01001_002E', 'B01001_026E','B01001_001E','B19013_001E']:
+for col in ['B01001_001E',
+'B19013_001E',
+'B15003_022E',
+'B25001_001E',
+'B01001_002E',
+'B01001_026E',
+'B25064_001E',]:
     # df[col] = (df[col] - df[col].mean()) / df[col].std()
     column_min = df[col].min()
     column_max = df[col].max()
@@ -39,7 +45,11 @@ angles_list=[]
 for index, row in df.iterrows():
     if not np.isnan(row['B01001_001E']) and not np.isnan(row['B19013_001E']):
         origin = [(row['B01001_001E']),( row['B19013_001E'])]
-        angles = [round((360 * z),0) for z in row[['B15003_022E', 'B12001_001E', 'B01001_002E', 'B01001_026E']]]
+        angles = [round((360 * z),0) for z in row[['B15003_022E',
+'B25001_001E',
+'B01001_002E',
+'B01001_026E',
+'B25064_001E']]]
         angles_list.append(angles)
         c_start_list.append(origin)
 print(angles_list)

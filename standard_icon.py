@@ -38,14 +38,15 @@ def draw_pattern(angle_ac, angle_bc, angle_dc, angle_ec, angle_c_vertical, unit_
 import plotly.graph_objects as go
 
 
-def draw_pattern_plotly(angle_sets, c_start, angle_rotation,unit_length=0.01):
+def draw_pattern_plotly(angle_sets, c_start, angle_rotation,unit_length=0.03):
     data = []
     c_data=[]
 
     for set_idx, (angles, c_mid) in enumerate(zip(angle_sets, c_start)):
 
 
-        angle_c_vertical=90
+        angle_c_vertical=angles[-1]
+        angles=angles[:-1]
         # 计算线段c的方向
         c_dx = np.cos(np.radians(angle_c_vertical))
         c_dy = np.sin(np.radians(angle_c_vertical))
@@ -64,12 +65,16 @@ def draw_pattern_plotly(angle_sets, c_start, angle_rotation,unit_length=0.01):
         c_end_rotated = np.dot(rotation_matrix, (c_end - c_mid)) + c_mid
         data.append({'x' : [c_start_rotated[0], c_end_rotated[0]], 'y' : [c_start_rotated[1],
                                                                          c_end_rotated[1]], 'mode' : 'lines',
-                                                                                                   'name' : 'c', 'legendgroup' : 'c', 'showlegend' : (
+                                                                                                   'name' : 'Total number of men', 'legendgroup' : 'Total number of men', 'showlegend' : (
                     set_idx == 0)})
         # 绘制线段c
-
+        # 'B15003_022E', # Number of people holding a bachelor's degree
+        # 'B25001_001E', # Total number of housing units
+        # 'B01001_002E', # Total number of men
+        # 'B01001_026E', # Total number of women
+        # 'B25064_001E', # Median rent
         # 计算并绘制其它线段
-        labels = ['a', 'b', 'd', 'e']
+        labels = ["People holding a bachelor's degree", 'Housing units', 'Total number of women', 'Median rent']
         points = [c_start, c_start, c_end, c_end]
 
         for i, angle in enumerate(angles):
@@ -89,7 +94,7 @@ def draw_pattern_plotly(angle_sets, c_start, angle_rotation,unit_length=0.01):
 
 # 设置两组角度参数以及c线段的角度
 angle_sets = [
-[38.0, 117.0, 70.0, 153.0]
+[38.0, 117.0, 70.0, 153.0,60]
     # [45, 45, 135, 135],  # 第一组图案的角度参数
     # [135, 135, 135, 135]   # 第二组图案的角度参数
 ]
@@ -114,7 +119,8 @@ def data_input(angle_sets,c_start):
         fig.add_trace(
             go.Scatter(i))
 
-    fig.update_layout(title="Chicago acs data 2017", xaxis_showgrid=False, yaxis_showgrid=False,
+    fig.update_layout(title="Chicago, IL acs data 2019", xaxis=dict(title='Total population'), # 设置横轴标签
+    yaxis=dict(title='Median household income'),
                       plot_bgcolor='white')
 
     fig.update_layout(
@@ -136,7 +142,7 @@ def data_input(angle_sets,c_start):
                           args=[None, dict(frame=dict(duration=500, redraw=True), fromcurrent=True)])])])
 
     frames = []
-    for angle in range(0, 360, 20):
+    for angle in range(0, 360, 10):
         frames.append(go.Frame(data=draw_pattern_plotly(angle_sets,c_start,angle),
                                name=f'frame{angle}'))
 
