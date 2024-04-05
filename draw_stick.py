@@ -3,18 +3,24 @@ import plotly.graph_objects as go
 import numpy as np
 
 # 加载数据
-df = pd.read_csv('ss.csv')
-
-# 转换数据类型确保数据是数值类型
-for column in df.columns:
-    df[column] = pd.to_numeric(df[column], errors='coerce')
-for col in ['B01001_001E',
+# df = pd.read_csv(r"ss.csv")
+df = pd.read_csv(r"boston_morphometrics_label_average_std_total.csv")
+test_list=['B01001_001E',
 'B19013_001E',
 'B15003_022E',
 'B25001_001E',
 'B01001_002E',
 'B01001_026E',
-'B25064_001E',]:
+'B25064_001E',]
+test_main=['B01001_001E',
+'B19013_001E']
+sample_list=['aver_area'	,'aver_peri'	,'aver_long_chord',	'aver_mean_radius',	'aver_smbr_ori']
+main_list=['aver_longedge_ori','aver_bissector_ori']
+all_list=sample_list+main_list
+# 转换数据类型确保数据是数值类型
+for column in df.columns:
+    df[column] = pd.to_numeric(df[column], errors='coerce')
+for col in all_list:
     # df[col] = (df[col] - df[col].mean()) / df[col].std()
     column_min = df[col].min()
     column_max = df[col].max()
@@ -43,19 +49,16 @@ c_start_list=[]
 angles_list=[]
 
 for index, row in df.iterrows():
-    if not np.isnan(row['B01001_001E']) and not np.isnan(row['B19013_001E']):
-        origin = [(row['B01001_001E']),( row['B19013_001E'])]
-        angles = [round((360 * z),0) for z in row[['B15003_022E',
-'B25001_001E',
-'B01001_002E',
-'B01001_026E',
-'B25064_001E']]]
+
+    # if not np.isnan(row['B01001_001E']) and not np.isnan(row['B19013_001E']):
+        origin = [(row[main_list[0]]),( row[main_list[1]])]
+        angles = [round((360 * z),0) for z in row[sample_list]]
         angles_list.append(angles)
         c_start_list.append(origin)
-print(angles_list)
-print(c_start_list)
+print(len(angles_list))
+print(len(c_start_list))
 from standard_icon import data_input
-data_input(angles_list,c_start_list)
+data_input(angles_list,c_start_list,sample_list,main_list)
     # fig_x, fig_y = create_stick_figure(angles, lengths, origin)
     # figures_data.append(go.Scatter(x=fig_x, y=fig_y, mode='lines+markers'))
 

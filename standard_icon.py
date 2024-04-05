@@ -38,7 +38,8 @@ def draw_pattern(angle_ac, angle_bc, angle_dc, angle_ec, angle_c_vertical, unit_
 import plotly.graph_objects as go
 
 
-def draw_pattern_plotly(angle_sets, c_start, angle_rotation,unit_length=0.03):
+def draw_pattern_plotly(angle_sets, c_start, angle_rotation,sample_list,main_list):
+    unit_length = 0.03
     data = []
     c_data=[]
 
@@ -65,7 +66,7 @@ def draw_pattern_plotly(angle_sets, c_start, angle_rotation,unit_length=0.03):
         c_end_rotated = np.dot(rotation_matrix, (c_end - c_mid)) + c_mid
         data.append({'x' : [c_start_rotated[0], c_end_rotated[0]], 'y' : [c_start_rotated[1],
                                                                          c_end_rotated[1]], 'mode' : 'lines',
-                                                                                                   'name' : 'Total number of men', 'legendgroup' : 'Total number of men', 'showlegend' : (
+                                                                                                   'name' : sample_list[2], 'legendgroup' : sample_list[2], 'showlegend' : (
                     set_idx == 0)})
         # 绘制线段c
         # 'B15003_022E', # Number of people holding a bachelor's degree
@@ -74,7 +75,8 @@ def draw_pattern_plotly(angle_sets, c_start, angle_rotation,unit_length=0.03):
         # 'B01001_026E', # Total number of women
         # 'B25064_001E', # Median rent
         # 计算并绘制其它线段
-        labels = ["People holding a bachelor's degree", 'Housing units', 'Total number of women', 'Median rent']
+        labels = sample_list[0:2]+sample_list[2:4]
+        # labels = ["People holding a bachelor's degree", 'Housing units', 'Total number of women', 'Median rent']
         points = [c_start, c_start, c_end, c_end]
 
         for i, angle in enumerate(angles):
@@ -99,7 +101,7 @@ angle_sets = [
     # [135, 135, 135, 135]   # 第二组图案的角度参数
 ]
 c_start = [[0.38968731792581085, 0.3179088738450779], [0.5365119440668091, 0.21254391572551784], [0.4899980578753156, 0.1902295365012758]]  # c线段相对于垂直线的角度
-def data_input(angle_sets,c_start):
+def data_input(angle_sets,c_start,sample_list,main_list):
 # 绘制图案
     for angle in angle_sets:
 
@@ -110,7 +112,7 @@ def data_input(angle_sets,c_start):
         # angles[2] = abs(angles[2])
         # angles[0] = abs(angles[0])
         angle[3] = -(angle[3])
-    data=draw_pattern_plotly(angle_sets,c_start,0)
+    data=draw_pattern_plotly(angle_sets,c_start,0,sample_list,main_list)
     fig = go.Figure()
     # fig.add_trace(
     #     go.Scatter(c_data))
@@ -119,8 +121,8 @@ def data_input(angle_sets,c_start):
         fig.add_trace(
             go.Scatter(i))
 
-    fig.update_layout(title="Chicago, IL acs data 2019", xaxis=dict(title='Total population'), # 设置横轴标签
-    yaxis=dict(title='Median household income'),
+    fig.update_layout(title="", xaxis=dict(title=main_list[0]), # 设置横轴标签
+    yaxis=dict(title=main_list[1]),
                       plot_bgcolor='white')
 
     fig.update_layout(
@@ -143,12 +145,12 @@ def data_input(angle_sets,c_start):
 
     frames = []
     for angle in range(0, 360, 10):
-        frames.append(go.Frame(data=draw_pattern_plotly(angle_sets,c_start,angle),
+        frames.append(go.Frame(data=draw_pattern_plotly(angle_sets,c_start,angle,sample_list,main_list),
                                name=f'frame{angle}'))
 
     fig.frames = frames
-
-    fig.show()
+    fig.write_html("pattern_animation.html")
+    # fig.show()
 # data_input(angle_sets,c_start)
 # 示例：绘制图案
 # draw_pattern(135, 135, 135, 135, 90)
