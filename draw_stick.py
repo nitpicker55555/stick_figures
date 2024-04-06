@@ -14,8 +14,10 @@ test_list=['B01001_001E',
 'B25064_001E',]
 test_main=['B01001_001E',
 'B19013_001E']
-sample_list=['aver_area'	,'aver_peri'	,'aver_long_chord',	'aver_mean_radius',	'aver_smbr_ori']
-main_list=['aver_longedge_ori','aver_bissector_ori']
+
+
+sample_list=['O_flow'	,'duration'	,'duration_variance',	'U7J002',	'VBC002']
+main_list=['num_builds','aver_density']
 all_list=sample_list+main_list
 # 转换数据类型确保数据是数值类型
 for column in df.columns:

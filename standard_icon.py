@@ -75,7 +75,7 @@ def draw_pattern_plotly(angle_sets, c_start, angle_rotation,sample_list,main_lis
         # 'B01001_026E', # Total number of women
         # 'B25064_001E', # Median rent
         # 计算并绘制其它线段
-        labels = sample_list[0:2]+sample_list[2:4]
+        labels =  sum(sample_list[:2] + sample_list[3:5]) #跳过2，就是stick的中间支撑杆
         # labels = ["People holding a bachelor's degree", 'Housing units', 'Total number of women', 'Median rent']
         points = [c_start, c_start, c_end, c_end]
 

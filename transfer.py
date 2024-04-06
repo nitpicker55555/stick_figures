@@ -1,7 +1,7 @@
 import subprocess,os
 # scp -r C:\Users\Morning\Desktop\my_project\stick_figures\ TUM_LfK@10.162.94.1:D:\puzhen\hi_structure\stick
 # 定义你想要运行的命令
-command = f"scp -r {os.getcwd()} TUM_LfK@10.162.94.1:D:\puzhen\hi_structure\stick"
+command = r"scp -r C:\Users\Morning\Desktop\my_project\stick_figures\*.py TUM_LfK@10.162.94.1:D:\puzhen\hi_structure\stick"
 
 # 使用subprocess运行命令
 # 这里使用了`shell=True`来允许运行shell命令
